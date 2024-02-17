@@ -1,0 +1,3 @@
+[submodule "include/quantlib"]
+	path = include/quantlib
+	url = https://github.com/lballabio/QuantLib.git
