@@ -1,4 +1,4 @@
-use std::{thread::available_parallelism, env::current_dir};
+use std::{env::current_dir, thread::available_parallelism};
 
 fn main() {
     println!("cargo:rerun-if-changed=src/main.rs");
@@ -31,7 +31,14 @@ fn main() {
             }
 
             // run configure
-            let prefix = format!("--prefix={}", current_dir().unwrap().join("include/quantlib/install_dir").to_str().unwrap());
+            let prefix = format!(
+                "--prefix={}",
+                current_dir()
+                    .unwrap()
+                    .join("include/quantlib/install_dir")
+                    .to_str()
+                    .unwrap()
+            );
             println!(">> Running configure {prefix}");
             let status = std::process::Command::new("./configure")
                 .arg(prefix)
@@ -65,6 +72,7 @@ fn main() {
 
     cxx_build::bridge("src/main.rs")
         .file("src/some_example.cc")
+        //.compiler("clang++")
         .flag_if_supported("-std=c++14")
         .include("include/quantlib/install_dir/include")
         .compile("quantlib_on_rust");

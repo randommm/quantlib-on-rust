@@ -26,18 +26,17 @@
 
 using namespace QuantLib;
 using namespace std;
-
-// Correct value is: (e^{-.25} \sqrt{\pi})^{dimension}
 struct integrand {
+  rust::Fn<double(rust::Vec<double> arg)> to_integrate;
   Real operator()(const std::vector<Real> &arg) const {
-    Real sum = 1.;
-    for (Real i : arg)
-      sum *= std::exp(-i * i) * std::cos(i);
-    return sum;
+    rust::Vec<Real> v;
+    for (auto x : arg)
+      v.push_back(x);
+    return to_integrate(v);
   }
 };
 
-int run_integral() {
+int run_integral(rust::Fn<double(rust::Vec<double> arg)> to_integrate) {
 
   try {
 
@@ -47,7 +46,9 @@ int run_integral() {
     Real exactSol = std::pow(std::exp(-.25) * std::sqrt(M_PI),
                              static_cast<Real>(dimension));
 
-    ext::function<Real(const std::vector<Real> &arg)> f = integrand();
+    integrand integrand_ins;
+    integrand_ins.to_integrate = to_integrate;
+    ext::function<Real(const std::vector<Real> &arg)> f = integrand_ins;
 
 #ifndef QL_PATCH_SOLARIS
     GaussianQuadMultidimIntegrator intg(dimension, 15);
